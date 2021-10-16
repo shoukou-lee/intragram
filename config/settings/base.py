@@ -42,7 +42,8 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db("DATABASE_URL", default="postgres:///intragram"),
+    # pgadmin에서 만든 db를 연결해준다
+    "default": env.db("DATABASE_URL", default="postgres://postgres:3375@localhost:5432/my_intragram_db"),
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
