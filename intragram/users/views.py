@@ -1,45 +1,23 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth import authenticate, login
+from django.http.response import HttpResponseRedirect
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import DetailView, RedirectView, UpdateView
-
-User = get_user_model()
+from django.shortcuts import render
 
 
-class UserDetailView(LoginRequiredMixin, DetailView):
+def main(request):
+    # 일반적으로 페이지를 보기 위한 경우, GET을 요청
+    if request.method == 'GET':
+        return render(request, 'users/main.html')
+    
+    # 로그인의 경우, POST를 요청 - https://docs.djangoproject.com/en/3.2/topics/auth/default/
+    elif request.method == 'POST':
+        # POST로 받은 username/password를 저장하고 auth한다.
+        user_name = request.POST['username']
+        user_password = request.POST['password']
+        user = authenticate(request, username=user_name, password=user_password)
 
-    model = User
-    slug_field = "username"
-    slug_url_kwarg = "username"
-
-
-user_detail_view = UserDetailView.as_view()
-
-
-class UserUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-
-    model = User
-    fields = ["name"]
-    success_message = _("Information successfully updated")
-
-    def get_success_url(self):
-        return self.request.user.get_absolute_url()  # type: ignore [union-attr]
-
-    def get_object(self):
-        return self.request.user
-
-
-user_update_view = UserUpdateView.as_view()
-
-
-class UserRedirectView(LoginRequiredMixin, RedirectView):
-
-    permanent = False
-
-    def get_redirect_url(self):
-        return reverse("users:detail", kwargs={"username": self.request.user.username})
-
-
-user_redirect_view = UserRedirectView.as_view()
+        if user is not None: # redirect to a success page
+            login(request, user)
+            return HttpResponseRedirect(reverse('posts:index')) # post 앱으로 redirect
+        else: # invalid login 
+            return render(request, 'users/main.html') # 로그인 실패시 다시 메인 페이지로
