@@ -1,0 +1,15 @@
+<h1>Here is SignUp page</h1>
+
+
+<form action="{% url 'users:signup'%}" method="post">
+    {% csrf_token %} <!-- post 요청 시 csrf 토큰 필수 -->
+    {% for field in form %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Sign up">
+</form>
+
+<a href="{% url 'users:main' %">Login</a>
